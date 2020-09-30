@@ -1,216 +1,230 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-// Use arrow notation for one line method definitions
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Grade Calculator',
+      title: "Grade Calculator",
       home: Scaffold(
-        appBar: AppBar(title: Text('Grade Calculator')),
+        appBar: AppBar(title: Text("Grade Calculator")),
         body: Center(
-          child: Container(
-            constraints: BoxConstraints(
-              maxWidth: 600,
-            ),
-            padding: EdgeInsets.all(20.0),
-            child: Grade(),
-          ),
-        ),
+            child: Container(
+          constraints: BoxConstraints(maxWidth: 275),
+          padding: EdgeInsets.all(20),
+          child: GenerateGrade(),
+        )),
       ),
     );
   }
 }
 
-class GradeModel {
-  bool _displayGrade;
+class Grade {
+  bool _display;
+  double _score;
+  double _possiblePoints;
   String _grade;
-  int _score;
-  String _item;
 
-  GradeModel() {
-    _displayGrade = false;
-    _grade = '';
+  Grade() {
+    _display = false;
+    _grade = "";
   }
 }
 
-class Grade extends StatefulWidget {
+class GenerateGrade extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() => _GradeState();
+  State<StatefulWidget> createState() => _GenerateGradeState();
 }
 
-class _GradeState extends State<Grade> {
+class _GenerateGradeState extends State<GenerateGrade> {
   final _formKey = GlobalKey<FormState>();
-  GradeModel model = new GradeModel();
+  Grade grade = new Grade();
+  var _scoreInput;
+  var _possiblePointsInput;
+  String _dropdown = "Standard";
 
   void _onSubmit() {
-    this._formKey.currentState.save();
     setState(() {
-      this.model._displayGrade = true;
-      this.model._grade = calculateGrade(this.model._score);
+      this.grade._display = true;
+      if (this._dropdown == "Standard") {
+        print("Standard grading");
+        this.grade._grade = _calculateStandardGrade(
+            this.grade._score, this.grade._possiblePoints);
+      }
+      if (this._dropdown == "Triage") {
+        print("Triage grading");
+        this.grade._grade = _calculateTriageGrade(
+            this.grade._score, this.grade._possiblePoints);
+      }
     });
   }
 
-  void _onFail() {
-    setState(() {
-      this.model._displayGrade = false;
-    });
+  String _calculateStandardGrade(double score, double possiblePoints) {
+    double percent = (score / possiblePoints) * 100;
+    if (percent >= 90) return "A";
+    if (percent >= 80) return "B";
+    if (percent >= 70) return "C";
+    if (percent >= 60) return "D";
+    if (percent < 60) return "F";
+    return "Invalid";
   }
 
-  String calculateGrade(int score) {
-    if (score < 60) return 'F';
-    if (score < 70) return 'D';
-    if (score < 80) return 'C';
-    if (score < 90) return 'B';
-    return 'A';
+  String _calculateTriageGrade(double score, double possiblePoints) {
+    double percent = (score / possiblePoints);
+    if (percent > (17.0 / 18.0)) return "A";
+    if (percent > (5.0 / 6.0)) return "B";
+    if (percent > (2.0 / 3.0)) return "C";
+    if (percent > (7.0 / 15.0)) return "D";
+    if (percent <= (7.0 / 15.0)) return "F";
+    return "Invalid";
+  }
+
+  String _validate(String value) {
+    if (double.tryParse(value) == null || value.isEmpty) {
+      return "Input must be a number";
+    }
+    return null;
+  }
+
+  Widget _scaleDropdown() {
+    return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 50.0),
+        child: Column(
+          children: [
+            Text("Grading scale:"),
+            DropdownButtonFormField(
+                value: "Standard",
+                items: <String>["Standard", "Triage"]
+                    .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+                onChanged: (String value) {
+                  this._dropdown = value;
+                })
+          ],
+        ));
+  }
+
+  Widget _scoreTextFiled() {
+    return TextFormField(
+      textAlign: TextAlign.center,
+      decoration: const InputDecoration(
+          hintText: "Input your score", border: OutlineInputBorder()),
+      keyboardType: TextInputType.number,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      validator: (value) {
+        String _validation = _validate(value);
+        if (_validation == null) {
+          this._scoreInput = double.parse(value);
+        }
+        return _validation;
+      },
+    );
+  }
+
+  Widget _totalTextFiled() {
+    return TextFormField(
+      textAlign: TextAlign.center,
+      decoration: const InputDecoration(
+          hintText: "Input the total possible points",
+          border: OutlineInputBorder()),
+      keyboardType: TextInputType.number,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      validator: (value) {
+        String _validation = _validate(value);
+        if (_validation == null) {
+          double _total = double.parse(value);
+          if (_total == 0) {
+            return "Value cannot be zero";
+          }
+          this._possiblePointsInput = _total;
+        }
+        return _validation;
+      },
+    );
+  }
+
+  Widget _divisionBar() {
+    return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10.0),
+        child: Divider(
+          color: Colors.black,
+          indent: 20,
+          endIndent: 20,
+          thickness: 1,
+        ));
+  }
+
+  Widget _submitButton() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16.0),
+      child: RaisedButton(
+        onPressed: () {
+          if (_formKey.currentState.validate()) {
+            _formKey.currentState.save();
+            this.grade._score = this._scoreInput;
+            this.grade._possiblePoints = this._possiblePointsInput;
+            print(this._dropdown);
+            _onSubmit();
+          }
+        },
+        child: Text('Convert'),
+      ),
+    );
+  }
+
+  Widget _gradeField() {
+    return Flexible(
+        child: this.grade._display ? Display(this.grade._grade) : Text(""));
   }
 
   @override
   Widget build(BuildContext context) {
     return Form(
-      key: _formKey,
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(
-            width: 1,
-            color: Colors.grey.withOpacity(1),
-          ),
-          borderRadius: BorderRadius.all(Radius.circular(10.0)),
-          boxShadow: <BoxShadow>[
-            BoxShadow(
-              color: Colors.black.withOpacity(.1),
-              offset: Offset(-5, 5),
-              spreadRadius: 0,
-              blurRadius: 5,
-            ),
-          ],
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        key: _formKey,
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Flexible(
-              child: Container(
-                padding: EdgeInsets.all(20.0),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(10),
-                    topRight: this.model._displayGrade
-                        ? Radius.circular(0)
-                        : Radius.circular(10),
-                    bottomLeft: Radius.circular(10),
-                    bottomRight: this.model._displayGrade
-                        ? Radius.circular(0)
-                        : Radius.circular(10),
-                  ),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ScoreInput(
-                      (String newValue) {
-                        this.model._score = int.parse(newValue);
-                      },
-                    ),
-                    SubmitButton(_formKey, _onSubmit, _onFail),
-                  ],
-                ),
-              ),
-            ),
-            Flexible(
-              child: this.model._displayGrade
-                  ? GradeDisplay(this.model._grade)
-                  : Text(''),
-            ),
+            _scaleDropdown(),
+            _scoreTextFiled(),
+            _divisionBar(),
+            _totalTextFiled(),
+            _submitButton(),
+            _gradeField()
           ],
-        ),
-      ),
-    );
+        ));
   }
 }
 
-class SubmitButton extends StatelessWidget {
-  final _formKey;
-  final _onSubmit;
-  final _onFail;
-  SubmitButton(this._formKey, this._onSubmit, this._onFail);
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 15.0),
-      child: RaisedButton(
-        onPressed: () {
-          if (this._formKey.currentState.validate()) {
-            this._onSubmit();
-          } else {
-            this._onFail();
-          }
-        },
-        child: Text('Submit'),
-      ),
-    );
-  }
-}
-
-class ScoreInput extends StatefulWidget {
-  final _onSaved;
-  ScoreInput(this._onSaved);
-  @override
-  _ScoreInputState createState() => _ScoreInputState(_onSaved);
-}
-
-class _ScoreInputState extends State<ScoreInput> {
-  var _onSaved;
-  _ScoreInputState(this._onSaved);
-
-  @override
-  Widget build(BuildContext context) {
-    return TextFormField(
-      keyboardType: TextInputType.number,
-      decoration: const InputDecoration(hintText: 'Enter your score'),
-      onSaved: (newValue) => this._onSaved(newValue),
-      validator: (value) {
-        if (value.isEmpty) {
-          return 'Please enter your score';
-        }
-        return null;
-      },
-    );
-  }
-}
-
-class GradeDisplay extends StatelessWidget {
+class Display extends StatelessWidget {
   final String _grade;
-  GradeDisplay(this._grade);
+  Display(this._grade);
+
+  String _getGreetingText() {
+    if (_grade == "A" || _grade == "Invalid") {
+      return "You earned an";
+    } else {
+      return "You earned a";
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.blue,
-            borderRadius: BorderRadius.only(
-              topRight: Radius.circular(10),
-              bottomRight: Radius.circular(10),
-            ),
-          ),
-          child: Text(
-            _grade,
-            textScaleFactor: 8.99,
-            textAlign: TextAlign.center,
-          ),
-        ),
-      ],
-    );
+    return Column(children: [
+      Text(
+        _getGreetingText(),
+        textAlign: TextAlign.center,
+      ),
+      Text(
+        _grade,
+        textScaleFactor: 7,
+        textAlign: TextAlign.center,
+      )
+    ]);
   }
 }
