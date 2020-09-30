@@ -1,6 +1,9 @@
 # myapp
 
-A new Flutter project.
+Intro to Flutter
+
+## GitHub Pages
+Link to GitHub Pages: https://bsu-hci.github.io/letter-grade/. 
 
 ## Getting Started
 
