@@ -116,7 +116,6 @@ class _GenerateGradeState extends State<GenerateGrade> {
       decoration: const InputDecoration(
           hintText: "Input your score", border: OutlineInputBorder()),
       keyboardType: TextInputType.number,
-      autovalidateMode: AutovalidateMode.onUserInteraction,
       validator: (value) {
         String _validation = _validate(value);
         if (_validation == null) {
@@ -131,10 +130,8 @@ class _GenerateGradeState extends State<GenerateGrade> {
     return TextFormField(
       textAlign: TextAlign.center,
       decoration: const InputDecoration(
-          hintText: "Input the total possible points",
-          border: OutlineInputBorder()),
+          hintText: "Input Total Points", border: OutlineInputBorder()),
       keyboardType: TextInputType.number,
-      autovalidateMode: AutovalidateMode.onUserInteraction,
       validator: (value) {
         String _validation = _validate(value);
         if (_validation == null) {
