@@ -43,17 +43,16 @@ class _GenerateGradeState extends State<GenerateGrade> {
   Grade grade = new Grade();
   var _scoreInput;
   var _possiblePointsInput;
-  String _dropdown = "Standard";
 
   void _onSubmit() {
     setState(() {
       this.grade._display = true;
-      if (this._dropdown == "Standard") {
+      if (this.radioButtonItem == "Standard") {
         print("Standard grading");
         this.grade._grade = _calculateStandardGrade(
             this.grade._score, this.grade._possiblePoints);
       }
-      if (this._dropdown == "Triage") {
+      if (this.radioButtonItem == "Triage") {
         print("Triage grading");
         this.grade._grade = _calculateTriageGrade(
             this.grade._score, this.grade._possiblePoints);
@@ -88,26 +87,54 @@ class _GenerateGradeState extends State<GenerateGrade> {
     return null;
   }
 
-  Widget _scaleDropdown() {
+  int id = 1;
+  String radioButtonItem = 'Standard';
+
+  Widget _radioButton() {
     return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 50.0),
-        child: Column(
-          children: [
-            Text("Grading scale:"),
-            DropdownButtonFormField(
-                value: "Standard",
-                items: <String>["Standard", "Triage"]
-                    .map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-                onChanged: (String value) {
-                  this._dropdown = value;
-                })
-          ],
-        ));
+      padding: const EdgeInsets.symmetric(vertical: 50.0),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Radio(
+                value: 1,
+                groupValue: id,
+                onChanged: (val) {
+                  setState(() {
+                    radioButtonItem = 'Standard';
+                    id = 1;
+                  });
+                },
+              ),
+              Text(
+                'Standard',
+                style: new TextStyle(fontSize: 17.0),
+              ),
+              Radio(
+                value: 2,
+                groupValue: id,
+                onChanged: (val) {
+                  setState(() {
+                    radioButtonItem = 'Triage';
+                    id = 2;
+                  });
+                  radioButtonItem = 'Triage';
+                  id = 2;
+                },
+              ),
+              Text(
+                'Triage',
+                style: new TextStyle(
+                  fontSize: 17.0,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _scoreTextFiled() {
@@ -146,17 +173,6 @@ class _GenerateGradeState extends State<GenerateGrade> {
     );
   }
 
-  Widget _divisionBar() {
-    return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10.0),
-        child: Divider(
-          color: Colors.black,
-          indent: 20,
-          endIndent: 20,
-          thickness: 1,
-        ));
-  }
-
   Widget _submitButton() {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -166,11 +182,11 @@ class _GenerateGradeState extends State<GenerateGrade> {
             _formKey.currentState.save();
             this.grade._score = this._scoreInput;
             this.grade._possiblePoints = this._possiblePointsInput;
-            print(this._dropdown);
+            print(this.radioButtonItem);
             _onSubmit();
           }
         },
-        child: Text('Convert'),
+        child: Text('Enter'),
       ),
     );
   }
@@ -187,9 +203,8 @@ class _GenerateGradeState extends State<GenerateGrade> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            _scaleDropdown(),
+            _radioButton(),
             _scoreTextFiled(),
-            _divisionBar(),
             _totalTextFiled(),
             _submitButton(),
             _gradeField()
@@ -204,9 +219,9 @@ class Display extends StatelessWidget {
 
   String _getGreetingText() {
     if (_grade == "A" || _grade == "Invalid") {
-      return "You earned an";
+      return "You Grade is an";
     } else {
-      return "You earned a";
+      return "Your Grade is a";
     }
   }
 
