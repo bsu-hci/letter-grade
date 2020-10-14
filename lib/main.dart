@@ -8,8 +8,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: "Grade Calculator",
+      theme: ThemeData(primaryColor: Colors.orange),
       home: Scaffold(
-        appBar: AppBar(title: Text("Grade Calculator")),
+        appBar: AppBar(
+            title: Text(
+          "Grade Calculator",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        )),
         body: Center(
             child: Container(
           constraints: BoxConstraints(maxWidth: 275),
@@ -48,12 +53,10 @@ class _GenerateGradeState extends State<GenerateGrade> {
     setState(() {
       this.grade._display = true;
       if (this.radioButtonItem == "Standard") {
-        print("Standard grading");
         this.grade._grade = _calculateStandardGrade(
             this.grade._score, this.grade._possiblePoints);
       }
       if (this.radioButtonItem == "Triage") {
-        print("Triage grading");
         this.grade._grade = _calculateTriageGrade(
             this.grade._score, this.grade._possiblePoints);
       }
@@ -89,7 +92,6 @@ class _GenerateGradeState extends State<GenerateGrade> {
 
   int id = 1;
   String radioButtonItem = 'Standard';
-
   Widget _radioButton() {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 50.0),
@@ -110,7 +112,10 @@ class _GenerateGradeState extends State<GenerateGrade> {
               ),
               Text(
                 'Standard',
-                style: new TextStyle(fontSize: 17.0),
+                style: new TextStyle(
+                  fontSize: 17.0,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               Radio(
                 value: 2,
@@ -126,9 +131,8 @@ class _GenerateGradeState extends State<GenerateGrade> {
               ),
               Text(
                 'Triage',
-                style: new TextStyle(
-                  fontSize: 17.0,
-                ),
+                style:
+                    new TextStyle(fontSize: 17.0, fontWeight: FontWeight.bold),
               ),
             ],
           ),
